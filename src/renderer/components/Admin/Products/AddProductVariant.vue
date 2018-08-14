@@ -17,7 +17,7 @@
                                 <label>Product</label>
                                 <select class="addPV-dropdown" id="addPV-select" v-on:change="loadForm()" v-on:focus="">
                                     <option value="">Select Product</option>
-                                    <option v-for="product in products" v-bind:value="product" >{{product}}</option>
+                                    <option v-for="product in products" v-bind:value="product">{{product}}</option>
                                 </select>
                             </div>
 
@@ -29,9 +29,13 @@
 
                                         <label>{{ field }}</label>
                                         <br/>
-                                        <input type="text" v-bind:id="field"  v-bind:name="field" class="addPV-f-control" required v-model="valuefields[field]" v-on:input="watchAndSuggest(field)"/>
+                                        <input type="text" v-bind:id="field" v-bind:name="field" class="addPV-f-control"
+                                               required v-model="valuefields[field]"
+                                               v-on:input="watchAndSuggest(field)"/>
                                         <div class="addPV-suggestions" v-if="field == sFieldSuggest">
-                                            <button v-for="suggestion in suggestions"  @click.prevent="editField(suggestion, field)">{{suggestion}}</button>
+                                            <button v-for="suggestion in suggestions"
+                                                    @click.prevent="editField(suggestion, field)">{{suggestion}}
+                                            </button>
                                         </div>
                                     </div>
 
@@ -39,7 +43,8 @@
 
 
                                 <div class="addPV-Bgroup">
-                                    <button class="addPV-button" @click.prevent="save"><i class="fa fa-save"/>SAVE</button>
+                                    <button class="addPV-button" @click.prevent="save"><i class="fa fa-save"/>SAVE
+                                    </button>
                                 </div>
 
                             </div>
@@ -64,12 +69,12 @@
                 dataLoaded: false,
                 formLoaded: false,
                 productName: '',
-                fields: {},
-                valuefields: {},
+                fields: [],
+                valuefields: [],
                 productSpecifications: [],
-                products: {},
-                clonevaluefields: {},
-                showSuggestion: {},
+                products: [],
+                clonevaluefields: [],
+                showSuggestion: [],
                 sFieldSuggest: '',
                 suggestions: []
             }
@@ -92,7 +97,7 @@
 
                     this.productSpecifications = productSpecifications
 
-                    for(var i=0; i<productSpecifications.length; i++){
+                    for (var i = 0; i < productSpecifications.length; i++) {
                         this.products[i] = productSpecifications[i].productName
                     }
 
@@ -102,15 +107,16 @@
 
             loadForm: function () {
                 var productName = document.getElementById("addPV-select").value
-                if(this.productSpecifications != undefined && productName!=""){
-                    this.fields=this.productSpecifications.find(o => o.productName == productName).fields
-                    this.valuefields = {}
-                    for(var field in this.fields){
+                if (this.productSpecifications != undefined && productName != "") {
+                    this.fields = this.productSpecifications.find(o => o.productName == productName).fields
+                    this.valuefields = []
+                    for (var field in this.fields) {
                         this.valuefields[this.fields[field]] = ''
                         this.showSuggestion[this.fields[field]] = false
                     }
                     this.sFieldSuggest = ''
                     this.valuefields["Product Name"] = productName
+                    this.productName = productName
                     this.clonevaluefields = this.valuefields
                     this.formLoaded = true
                 } else {
@@ -124,9 +130,22 @@
             },
 
             save: function () {
-                
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == 'Not Added') {
+                        instance.$snackbar.open("Product could not be added")
+                    } else {
+                        instance.$toast.open(msg)
+                        instance.closeandrefresh()
+                    }
+                }
+
+                console.log("Add Product Variant", this.productName, this.valuefields["Product Name"])
+                dbUtils.addProduct(this.productName, this.fields, this.valuefields, callback)
+
             },
-            
+
             getKey: function (obj, val) {
                 return Object.keys(obj).find(key => obj[key] === val)
             },
@@ -136,18 +155,18 @@
                 var value = document.getElementById(field).value
                 var re = new RegExp("" + value.toLowerCase() + ".*");
 
-                for(var ss in this.showSuggestion){
+                for (var ss in this.showSuggestion) {
                     ss = false
                 }
-                if(this.valuefields[field] != ''){
+                if (this.valuefields[field] != '') {
 
                     dbUtils.getAllProductsByProductName(productName).then((products, err) => {
                         if (err) throw err
 
-                        if(products != undefined && products.length != 0){
+                        if (products != undefined && products.length != 0) {
                             this.suggestions = []
-                            for(var i = 0; i< products.length; i++){
-                                if(!this.suggestions.includes(products[i].fields['0'][field]) && products[i].fields['0'][field].toLowerCase().match(re)){
+                            for (var i = 0; i < products.length; i++) {
+                                if (!this.suggestions.includes(products[i].fields['0'][field]) && products[i].fields['0'][field].toLowerCase().match(re)) {
                                     this.suggestions.push(products[i].fields['0'][field])
                                 }
                             }
@@ -182,7 +201,7 @@
 
 <style scoped>
 
-    .modal-dialog{
+    .modal-dialog {
         margin-top: 150px;
         border: none;
         border-radius: 5px;
@@ -190,13 +209,13 @@
         height: auto;
     }
 
-    .modal{
+    .modal {
         border-radius: 5px;
         border: none;
         outline: none;
     }
 
-    .modal-content{
+    .modal-content {
         border-radius: 5px;
         border: none;
         outline: none;
@@ -204,7 +223,7 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    .addPV-wrapper{
+    .addPV-wrapper {
         border: none;
         outline: none;
         background: white;
@@ -263,7 +282,6 @@
         margin-left: 20px;
     }
 
-
     .addPV-f-group input {
         width: 100%;
         border: none;
@@ -285,13 +303,12 @@
         padding-left: 5px;
         padding-right: 5px;
         height: 25px;
-        border-bottom: 2px solid rgba(2,170,176,0.8);
+        border-bottom: 2px solid rgba(2, 170, 176, 0.8);
         outline: none;
         transition: 0.5s;
     }
 
-
-    #hideAddPV{
+    #hideAddPV {
         float: right;
         background: white;
         outline: none;
@@ -300,7 +317,6 @@
         margin-right: -3px;
     }
 
-
     .addPV-Igroup label {
         width: 100%;
         font-size: 0.8em;
@@ -308,8 +324,7 @@
         margin-left: 20px;
     }
 
-
-    .addPV-dropdown select{
+    .addPV-dropdown select {
         border-radius: 5px;
         border: 2px solid rgb(244, 245, 249);
         background: white;
@@ -328,8 +343,7 @@
         font-size: 13px;
     }
 
-
-    .addPV-Bgroup{
+    .addPV-Bgroup {
         margin: 0 auto;
         width: 180px;
     }
@@ -341,7 +355,7 @@
         height: 45px;
         outline: none;
         font-weight: bold;
-        background: linear-gradient(to bottom right, rgba(2,170,176,0.8), rgba(0,205,172, 0.8)); /*#e96868;*/
+        background: linear-gradient(to bottom right, rgba(2, 170, 176, 0.8), rgba(0, 205, 172, 0.8)); /*#e96868;*/
         color: white;
         border-radius: 25px;
         box-shadow: none;
@@ -353,7 +367,7 @@
     .addPV-Bgroup button:focus {
         height: 45px;
         outline: none;
-        background: linear-gradient(to bottom right, rgba(2,170,176,1), rgba(0,205,172, 1)); /*#e74f4e;*/
+        background: linear-gradient(to bottom right, rgba(2, 170, 176, 1), rgba(0, 205, 172, 1)); /*#e74f4e;*/
         color: white;
         transition: 0.5s;
         border-radius: 25px;
@@ -362,13 +376,13 @@
     .addPV-Bgroup button:hover {
         height: 45px;
         outline: none;
-        background: linear-gradient(to bottom right, rgba(2,170,176,1), rgba(0,205,172, 1)); /*#e74f4e;*/
+        background: linear-gradient(to bottom right, rgba(2, 170, 176, 1), rgba(0, 205, 172, 1)); /*#e74f4e;*/
         color: white;
         transition: 0.5s;
         border-radius: 25px;
     }
 
-    .addPV-Bgroup i{
+    .addPV-Bgroup i {
         color: white;
         margin-right: 10px;
     }

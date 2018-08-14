@@ -27,6 +27,9 @@
 </template>
 
 <script>
+
+    import dbUtils from "../../../db"
+
     export default {
         name: "AddClient",
         data: function () {
@@ -48,8 +51,31 @@
 
             save: function () {
 
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == 'Not Added') {
+                        instance.$snackbar.open("Client could not be added")
+                    } else {
+                        instance.$toast.open(msg)
+                        instance.closeandrefresh()
+                    }
+                }
+
+                dbUtils.addClient(this.clientFieldValues["Client Name"], this.clientFieldValues["Address"], this.clientFieldValues["City"], this.clientFieldValues["State"], this.clientFieldValues["Pincode"], this.clientFieldValues["Phone No"], this.clientFieldValues["Mobile No"], this.clientFieldValues["GST UIN"], callback)
 
             },
+
+            initialize: function () {
+                this.clientFieldValues["Client Name"] = ''
+                this.clientFieldValues["Address"] = ''
+                this.clientFieldValues["City"] = ''
+                this.clientFieldValues["State"] = ''
+                this.clientFieldValues["Pincode"] = 0
+                this.clientFieldValues["Phone No"] = 0
+                this.clientFieldValues["Mobile No"] = 0
+                this.clientFieldValues["GST UIN"] = ''
+            }
 
         },
 
@@ -59,6 +85,10 @@
                     this.close()
                 }
             });
+        },
+
+        created: function () {
+            this.initialize()
         }
     }
 </script>

@@ -9,7 +9,7 @@
                             <h4> Update HSN Code </h4>
 
                             <div class="updateHSNC-Igroup">
-                                <label for="hsnCode">HSN Codez</label>
+                                <label for="hsnCode">HSN Code</label>
                                 <br/>
                                 <input type="text" id="hsnCode" name="hsnCode" class="f-control" required v-model="hsnCode" readonly/>
                             </div>
@@ -45,6 +45,9 @@
 </template>
 
 <script>
+
+    import dbUtils from "../../../db";
+
     export default {
 
         props: ['hC'],
@@ -70,7 +73,19 @@
 
             save: function () {
                 if (this.hsnCode != 0) {
-                    this.closeandrefresh()
+                    var instance = this
+
+                    function callback(msg) {
+                        if (msg == 'Not Updated') {
+                            instance.$snackbar.open("HSN Code could not be updated")
+                        } else {
+                            instance.$toast.open(msg)
+                            instance.closeandrefresh()
+                        }
+                    }
+
+
+                    dbUtils.updateHSNCodes(this.$props.hC._id, this.hsnCode, this.cgst, this.sgst, this.igst, callback)
                     //call save
                 } else {
                     document.getElementById('hsnCode').focus()
@@ -144,8 +159,7 @@
         width: 180px;
     }
 
-
-    .addHSNC-Igroup label {
+    .updateHSNC-Igroup label {
         width: 100%;
         display: block;
         float: left;
@@ -153,7 +167,6 @@
         color: darkslategrey;
         margin-left: 20px;
     }
-
 
     .updateHSNC-Igroup {
         padding-right: 50px;

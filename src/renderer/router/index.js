@@ -54,7 +54,25 @@ export default new Router({
                   name: 'settings-page',
                   component: require('@/components/Admin/Settings').default
               },
+
+              {
+                  path: '/admin/vieworder/:id',
+                  name: 'vieworder-page',
+                  component: require('@/components/Admin/ViewOrder').default
+              },
           ]
+      },
+
+      {
+          path: '/orderPerforma/:id',
+          name: 'order-performa',
+          component: require('@/components/Print/OrderPerforma').default
+      },
+
+      {
+          path: '/bill/:id',
+          name: 'bill',
+          component: require('@/components/Print/Bill').default
       },
     {
       path: '*',

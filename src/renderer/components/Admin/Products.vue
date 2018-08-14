@@ -28,13 +28,26 @@
                         </template>
 
                         <template slot="detail" slot-scope="props">
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="deleteProductVariant(props.row._id, product.productName)">
+                                            DELETE
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditPV(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </b-table>
                 </section>
+
+                <edit-product-variant v-if="editPV" @closeEditPV="hideEditPV" @reloadEditPV="reloadEditPV"
+                                      :pV="selectedItem"></edit-product-variant>
             </div>
         </div>
 
@@ -117,6 +130,7 @@
             },
 
             showEditPV: function (productVariant) {
+                this.selectedItem['_id'] = productVariant._id
                 this.selectedItem['productName'] = productVariant.productName
                 this.selectedItem['valuefields'] = productVariant.fields['0']
                 this.editPV = true
@@ -130,6 +144,20 @@
             reloadEditPV: function () {
                 this.fetchAll()
                 this.hideEditPV()
+            },
+
+            deleteProductVariant: function (id, productName) {
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == "Found") {
+                        instance.reloadEditPV()
+                    } else {
+                        this.$snackbar.open("Product not found!")
+                    }
+                }
+
+                dbUtils.deleteProduct(id, callback)
             }
         },
 
@@ -139,7 +167,7 @@
     }
 </script>
 
-<style scoped>
+<style>
 
     .loading {
         display: flex;
@@ -181,52 +209,6 @@
         margin-bottom: 20px;
     }
 
-    .products-table {
-        width: 90%;
-        padding: 15px;
-        margin-bottom: 30px;
-    }
-
-    .products-table th {
-        background: rgb(244, 245, 249);
-        font-weight: bold;
-        font-size: 13px;
-        padding: 15px;
-    }
-
-    .products-table td {
-        border-radius: 5px;
-        color: darkslategray;
-        font-size: 12px;
-        padding: 15px;
-        font-weight: lighter;
-        border-right: solid 1px rgb(244, 245, 249);
-        border-left: solid 1px rgb(244, 245, 249);
-        border-bottom: solid 1px rgb(244, 245, 249);
-    }
-
-    .table-striped > tbody > tr:nth-child(odd) > td,
-    .table-striped > tbody > tr:nth-child(odd) > th {
-        background-color: white;
-    }
-
-    .table-striped > tbody > tr:nth-child(even) > td,
-    .table-striped > tbody > tr:nth-child(even) > th {
-        background-color: rgba(244, 245, 249, 0.5);
-    }
-
-    .products-delete, .products-edit {
-        color: rgba(2, 170, 176, 1);
-        background: white;
-        outline: none;
-        text-decoration: none;
-        margin-left: 30px;
-        margin-right: 60px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        border: none;
-    }
-
 
     #products-add-product  {
         border: none;
@@ -266,6 +248,135 @@
 
     #products-add-product i{
         color: white;
+        margin-right: 10px;
+    }
+
+    .hula1 {
+        padding-left: 30px;
+        padding-right: 30px;
+        width: 100%;
+    }
+
+    .hulu1 {
+        width: 50%;
+    }
+
+    .pendingOrders-table {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+
+    .pendingOrders-table th, .table thead {
+        background: rgb(244, 245, 249);
+        font-weight: bold;
+        font-size: 13px;
+        padding: 15px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .table thead th, .table thead tr {
+        border: none;
+    }
+
+    .b-table {
+        padding: 0;
+        border-radius: 3px;
+    }
+
+    .b-table select, p {
+        display: none;
+    }
+
+    .b-table a {
+        font-size: 13px;
+        color: black;
+        padding: 4px;
+    }
+
+    .b-table .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .table .icon {
+        display: table;
+        margin-top: -15px;
+        visibility: visible;
+    }
+
+    .table thead .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .level .icon {
+        visibility: visible;
+        margin-top: -2px;
+        margin-right: 15px;
+        display: block;
+    }
+
+    .table > tbody > tr:nth-child(odd) > td,
+    .table > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table > tbody > tr:nth-child(even) > td,
+    .table > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .pendingOrders-table td {
+        border-radius: 5px;
+        color: darkslategray;
+        font-size: 12px;
+        padding: 15px;
+        font-weight: lighter;
+        border-right: solid 1px rgb(244, 245, 249);
+        border-left: solid 1px rgb(244, 245, 249);
+        border-bottom: solid 1px rgb(244, 245, 249);
+    }
+
+    .table-striped > tbody > tr:nth-child(odd) > td,
+    .table-striped > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table-striped > tbody > tr:nth-child(even) > td,
+    .table-striped > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .options button {
+        cursor: pointer;
+        border: none;
+        height: 35px;
+        outline: none;
+        font-weight: bold;
+        background: #E0E0E0; /*#e96868;*/
+        color: black;
+        border-radius: 3px;
+        box-shadow: none;
+        font-size: 12px;
+        transition: 0.5s;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .options button:focus {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options button:hover {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options i {
+        color: black;
         margin-right: 10px;
     }
 

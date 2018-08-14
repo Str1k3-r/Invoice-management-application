@@ -15,5 +15,25 @@ var clientSchema = new Schema({
 })
 
 
-var clientModel = mongoose.model('clientModel', clientSchema)
-module.exports = clientModel
+clientSchema.pre('remove', function (callback) {
+    console.log("CLIENT PRE REMOVE")
+    var instance = this
+    instance.model('orderModel').find({client: this._id}).then((orders) => {
+        Promise.all(orders.map(function (order) {
+            instance.model('orderItemModel').deleteMany({order: order._id}).then(() => {
+                instance.model('invoiceModel').deleteMany({order: order._id}).then(() => {
+                    instance.model('paymentSlipModel').deleteMany({order: order._id}).then(() => {
+                        instance.model('transportSlipModel').deleteMany({order: order._id})
+                    })
+                })
+            })
+        }))
+    }).then(() => {
+        instance.model('orderModel').deleteMany({client: this._id}).then(() => {
+            callback()
+        })
+    });
+});
+
+var clients = mongoose.model('clientModel', clientSchema)
+export default clients

@@ -5,10 +5,10 @@ mongoose.Promise = global.Promise
 var db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error'))
 
-var productSpecification = require('./database/models/ProductSpecification')
+var productSpecifications = require('./database/models/ProductSpecification')
 var hsnCodes = require('./database/models/HSNcode')
 var products = require('./database/models/Product')
-var clients = require('./database/models/Client')
+import clients from './database/models/Client'
 var orders = require('./database/models/Order')
 var orderItems = require('./database/models/OrderItem')
 var invoices = require('./database/models/Invoice')
@@ -17,79 +17,75 @@ var transportSlips = require('./database/models/TransportSlip')
 
 //PRODUCTIONSPECIFICATIONS ---------------------------------------------------
 
-function addProductSpecification(productName, fields) {
-    var productSpecification = new productSpecification({
+function addProductSpecification(productName, fields, callback) {
+    productSpecifications.create({
         productName: productName,
         fields: fields
-    })
-    productSpecification.save(function (err) {
-        if (err) throw err;
+    }, (err, productSpecification) => {
+        if (err) {
+            console.log(err)
+            callback("Not Added")
+        }
 
-        console.log('Product successfully saved.');
-    });
+        callback("Product Specification has been added.")
+    })
 }
 
 
-function deleteProductSpecification(productName) {
-    productSpecification.deleteOne({productName: productName}, (err) => {
-        if (err) throw err;
-
-        console.log('Product successfully deleted.');
+function deleteProductSpecification(id, callback) {
+    productSpecifications.findById(id, (err, psDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        psDoc.remove()
+        callback("Found")
     })
 }
 
 
 function getAllProductSpecifications() {
-    return productSpecification.find((err) => {
+    return productSpecifications.find((err) => {
         if (err) throw err
     }).exec()
 }
 
 
-function getProductSpecification(productName) {
-    productSpecification.find({productName: productName}, (err, productSpecifications) => {
-        if (err) throw err
-
-        console.log(productSpecifications)
-        return productSpecifications
-    })
-}
-
-
-function updateProductSpecification(producName, fields) {
-    productSpecification.updateOne({productName: producName}, {
+function updateProductSpecification(id, producName, fields, callback) {
+    productSpecifications.updateOne({_id: id}, {
         producName: producName,
         fields: fields
-    }, (err, productSpecifications) => {
-        if (err) throw err
-
-        console.log(productSpecifications)
-        return productSpecifications
-    })
+    }).then(() => {
+        callback("Product Specification has been updated")
+    });
 }
 
 
 //HSNCODES ---------------------------------------------------
 
-function addHSNCode(hsnCode, cgst, sgst, igst) {
-    var hsnCode = new hsnCodes({
+function addHSNCode(hsnCode, cgst, sgst, igst, callback) {
+    hsnCodes.create({
         hsnCode: hsnCode,
         cgst: cgst,
         sgst: sgst,
         igst: igst
-    })
-    hsnCode.save(function (err) {
-        if (err) throw err;
+    }, (err, hsnCode) => {
+        if (err) {
+            console.log(err)
+            callback("Not Added")
+        }
 
-        console.log('HSNCode successfully saved.');
-    });
+        callback("HSN Code has been added.")
+    })
+
 }
 
-function deleteHSNCode(hsnCode) {
-    hsnCode.deleteOne({hsnCode: hsnCode}, (err) => {
-        if (err) throw err;
-
-        console.log('HSNCode successfully deleted.');
+function deleteHSNCode(id, callback) {
+    hsnCodes.findById(id, (err, hsnDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        hsnDoc.remove()
+        callback("Found")
     })
 }
 
@@ -101,26 +97,14 @@ function getAllHSNCodes() {
 }
 
 
-function getHSNCode(hsnCode) {
-    hsnCode.find({hsnCode: hsnCode}, (err, hsnCode) => {
-        if (err) throw err
-
-        console.log(hsnCode)
-        return hsnCode
-    })
-}
-
-function updateHSNCodes(hsnCode, cgst, sgst, igst) {
-    hsnCode.updateOne({hsnCode: hsnCode}, {
+function updateHSNCodes(id, hsnCode, cgst, sgst, igst, callback) {
+    hsnCodes.updateOne({_id: id}, {
         hsnCode: hsnCode,
         cgst: cgst,
         sgst: sgst,
         igst: igst
-    }, (err, hsnCode) => {
-        if (err) throw err
-
-        console.log(hsnCode)
-        return hsnCode
+    }).then(() => {
+        callback("HSN Code has been updated")
     })
 }
 
@@ -128,38 +112,35 @@ function updateHSNCodes(hsnCode, cgst, sgst, igst) {
 //PRODUCTS ---------------------------------------------------
 
 
-function addProduct(productName, fields, fieldValues) {
+function addProduct(productName, fields, fieldValues, callback) {
 
-    data = {}
-    for (i = 0; i < fields.length; i++) {
-        data[fields[i]] = fieldValues[i]
+    var data = {}
+    for (var i = 0; i < fields.length; i++) {
+        data[fields[i]] = fieldValues[fields[i]]
     }
 
-    var product = new products({
+    products.create({
         productName: productName,
         fields: data
-    })
-    product.save(function (err) {
-        if (err) throw err;
+    }, (err, product) => {
+        if (err) {
+            console.log(err)
+            callback("Not Added")
+        }
 
-        console.log('Product successfully saved.');
-    });
+        callback("Product has been added.")
+    })
+
 }
 
-function deleteProduct(fields, fieldValues) {
+function deleteProduct(id, callback) {
 
-    data = {}
-    for (i = 0; i < fields.length; i++) {
-        data[fields[i]] = fieldValues[i]
-    }
-
-    console.log(data)
-
-
-    products.deleteOne({fields: data}, (err) => {
-        if (err) throw err;
-
-        console.log('Product successfully deleted.');
+    products.findById(id, (err, pDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        pDoc.remove()
+        callback("Found")
     })
 }
 
@@ -169,11 +150,6 @@ function getAllProductsByProductName(productName) {
     }).exec()
 }
 
-function getAllProductsByProperties(obj) {
-    return products.find(obj, (err, products) => {
-        if (err) throw err
-    }).exec()
-}
 
 function getAllProducts() {
     return products.find((err, products) => {
@@ -181,49 +157,18 @@ function getAllProducts() {
     }).exec()
 }
 
-function getProduct(field, fieldValues) {
-
-    var data = {}
-    for (i = 0; i < fields.length; i++) {
-        data[fields[i]] = fieldValues[i]
-    }
-
-    console.log(data)
-
-
-    hsnCode.find({fields: data}, (err, product) => {
-        if (err) throw err
-
-        console.log(product)
-        return product
-    })
-}
-
-
-function updateProduct(productName, field, fieldValues, newFieldValues) {
-
-    var data = {}
-    for (i = 0; i < fields.length; i++) {
-        data[fields[i]] = fieldValues[i]
-    }
-
-    console.log(data)
+function updateProduct(id, productName, fields, newFieldValues, callback) {
 
     var newdata = {}
-    for (i = 0; i < fields.length; i++) {
-        newdata[fields[i]] = newFieldValues[i]
+    for (var i = 0; i < fields.length; i++) {
+        newdata[fields[i]] = newFieldValues[fields[i]]
     }
 
-    console.log(newdata)
-
-    hsnCode.updateOne({fields: data}, {
+    products.updateOne({_id: id}, {
         productName: productName,
         fields: newdata
-    }, (err, product) => {
-        if (err) throw err
-
-        console.log(product)
-        return product
+    }).then(() => {
+        callback("Product has been updated")
     })
 
 }
@@ -231,9 +176,9 @@ function updateProduct(productName, field, fieldValues, newFieldValues) {
 
 //CLIENTS ---------------------------------------------------
 
-function addClient(clientName, address1, city, state, pincode, phoneNo, mobileNo, gstUIN) {
+function addClient(clientName, address1, city, state, pincode, phoneNo, mobileNo, gstUIN, callback) {
 
-    var client = new clients({
+    clients.create({
         clientName: clientName,
         address1: address1,
         city: city,
@@ -242,11 +187,15 @@ function addClient(clientName, address1, city, state, pincode, phoneNo, mobileNo
         phoneNo: phoneNo,
         mobileNo: mobileNo,
         gstUIN: gstUIN,
+    }, (err, client) => {
+        if (err) {
+            console.log(err)
+            callback("Not Added")
+        }
+
+        callback("Client has been added.")
     })
 
-    client.save().then(() => {
-        console.log("Client saved successfully")
-    });
 }
 
 
@@ -254,6 +203,10 @@ function getAllClients() {
     return clients.find((err) => {
         if (err) throw err
     }).sort('clientName').exec()
+}
+
+function getClientById(id) {
+    return clients.findOne({_id: id}).exec()
 }
 
 function findClient(client) {
@@ -273,8 +226,36 @@ function findClient(client) {
 }
 
 
+function deleteClient(id, callback) {
+    clients.findById(id, (err, cDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        cDoc.remove()
+        callback("Found")
+    })
+}
+
+function updateClient(id, clientName, address1, city, state, pincode, phoneNo, mobileNo, gstUIN, callback) {
+    clients.updateOne({
+        _id: id
+    }, {
+        clientName: clientName,
+        address1: address1,
+        city: city,
+        state: state,
+        pincode: pincode,
+        phoneNo: phoneNo,
+        mobileNo: mobileNo,
+        gstUIN: gstUIN
+    }).then(() => {
+        callback("Client has been updated!")
+    })
+}
+
+
 //ORDERS ---------------------------------------------------
-function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderCompletedDate, orderStatus, totalBeforeTaxAmount, totalCGST, totalSGST, totalIGST, totalGST, totalAfterTaxAmount, roundOff, orderItems1, callback, instance) {
+function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderCompletedDate, orderStatus, orderItems1, callback, instance) {
     var order = new orders({
         _id: new mongoose.Types.ObjectId(),
         orderNumber: orderNumber,
@@ -282,13 +263,6 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
         orderPlacedDate: orderPlacedDate,
         orderCompletedDate: orderCompletedDate,
         orderStatus: orderStatus,
-        totalBeforeTaxAmount: totalBeforeTaxAmount,
-        totalCGST: totalCGST,
-        totalSGST: totalSGST,
-        totalIGST: totalIGST,
-        totalGST: totalGST,
-        totalAfterTaxAmount: totalAfterTaxAmount,
-        roundOff: roundOff,
         savedInvoices: null,
         savedPaymentSlips: null,
         savedTransportSlips: null
@@ -325,7 +299,6 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
 
 
     Promise.all(promises).then((values) => {
-        console.log(values.length, values)
         for (var i = 0; i < values.length; i++) {
             order.orderItems.push(values[i])
         }
@@ -384,8 +357,59 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
 }
 
 
+function getOrderById(id) {
+    return orders.find({_id: id}, (err) => {
+        if (err) throw err
+    }).populate('orderItems').populate('client').populate('savedInvoices').populate('savedPaymentSlips').populate('savedTransportSlips').exec()
+}
+
+
 function callback() {
 
+}
+
+function deleteOrderById(id, callback) {
+    orders.findById(id, (err, cDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        cDoc.remove()
+        callback("Found")
+    })
+}
+
+function deleteOrderItemById(id, callback) {
+    orderItems.findById(id, (err, oIDoc) => {
+        if (err) {
+            callback("Not Found")
+        }
+        oIDoc.remove()
+        callback("Found")
+    })
+}
+
+
+function updateOrderItem(id, callback) {
+    orderItems.updateOne({_id: id}, {
+        productDescription: productDescription,
+        itemStatus: itemStatus,
+        hsnCode: hsnCode,
+        size: size,
+        discount: discount,
+        quantity: quantity,
+        amount: amount,
+        taxableAmount: taxableAmount,
+        cgstRate: cgstRate,
+        cgstAmount: cgstAmount,
+        sgstRate: sgstRate,
+        sgstAmount: sgstAmount,
+        igstRate: igstRate,
+        igstAmount: igstAmount,
+        totalAmount: totalAmount,
+        fulfilledDate: fulfilledDate,
+    }).then(() => {
+        callback()
+    })
 }
 
 function getAllOrders() {
@@ -398,20 +422,26 @@ function getAllOrders() {
 var dbUtils = {
     addProductSpecification,
     getAllProductSpecifications,
-    getProductSpecification,
     deleteProductSpecification,
     updateProductSpecification,
     addHSNCode,
     getAllHSNCodes,
-    getHSNCode,
     deleteHSNCode,
     updateHSNCodes,
+    addProduct,
+    deleteProduct,
     getAllProducts,
     getAllProductsByProductName,
-    getAllProductsByProperties,
+    updateProduct,
     addClient,
     getAllClients,
+    updateClient,
+    findClient,
+    deleteClient,
+    getClientById,
     getAllOrders,
+    getOrderById,
+    deleteOrderById,
     addOrder
 }
 

@@ -127,7 +127,7 @@
                                             <div class="addC-Igroup">
                                                 <label>Size</label>
                                                 <br/>
-                                                <input type="number" class="size f-control" required
+                                                <input type="text" class="size f-control" required
                                                        v-model="orderItems[i-1].size"/>
                                             </div>
 
@@ -389,11 +389,12 @@
                 this.dataLoaded = false
 
                 var instance = this
-                function callback(instance){
+
+                function callback(instance) {
                     instance.closeandrefresh()
                 }
 
-                dbUtils.addOrder(instance.orderNumber, client, instance.orderPlacedBy, instance.orderPlacedDate, instance.orderCompletedDate, instance.orderStatus, instance.totalBeforeTaxAmount, instance.totalCGST, instance.totalSGST, instance.totalIGST, instance.totalGST, instance.totalAfterTaxAmount, instance.roundOff, instance.orderItems, callback, instance)
+                dbUtils.addOrder(instance.orderNumber, client, instance.orderPlacedBy, instance.orderPlacedDate, instance.orderCompletedDate, instance.orderStatus, instance.orderItems, callback, instance)
             },
 
             next: function () {
@@ -457,6 +458,8 @@
             },
 
             addOrderItem: function () {
+
+                this.showOrderItem[this.numberOfItems - 1] = false
                 this.orderItems[this.numberOfItems] = {
                     productDescription: '',
                     size: 0,
@@ -581,10 +584,10 @@
                         if (this.clientFieldValues["State"].toLowerCase() == "rajasthan") {
 
                             this.$set(this.orderItems[index], "sgstRate", code.sgst)
+                            this.$set(this.orderItems[index], "cgstRate", code.cgst)
 
                         } else {
 
-                            this.$set(this.orderItems[index], "cgstRate", code.cgst)
                             this.$set(this.orderItems[index], "igstRate", code.igst)
 
                         }
@@ -598,11 +601,11 @@
 
                 if (this.orderItems[index].quantity != 0) {
 
-                    this.$set(this.orderItems[index], "taxableAmount", this.orderItems[index].quantity * this.orderItems[index].amount * (1 - (this.orderItems[index].discount) / 100))
-                    this.$set(this.orderItems[index], "cgstAmount", this.orderItems[index].taxableAmount * this.orderItems[index].cgstRate / 100)
-                    this.$set(this.orderItems[index], "sgstAmount", this.orderItems[index].taxableAmount * this.orderItems[index].sgstRate / 100)
-                    this.$set(this.orderItems[index], "igstAmount", this.orderItems[index].taxableAmount * this.orderItems[index].igstRate / 100)
-                    this.$set(this.orderItems[index], "totalAmount", this.orderItems[index].taxableAmount + this.orderItems[index].cgstAmount + this.orderItems[index].sgstAmount + this.orderItems[index].igstAmount)
+                    this.$set(this.orderItems[index], "taxableAmount", this.roundToTwo(this.orderItems[index].quantity * this.orderItems[index].amount))
+                    this.$set(this.orderItems[index], "cgstAmount", this.roundToTwo(this.orderItems[index].taxableAmount * (1 - this.orderItems[index].discount / 100) * this.orderItems[index].cgstRate / 100))
+                    this.$set(this.orderItems[index], "sgstAmount", this.roundToTwo(this.orderItems[index].taxableAmount * (1 - this.orderItems[index].discount / 100) * this.orderItems[index].sgstRate / 100))
+                    this.$set(this.orderItems[index], "igstAmount", this.roundToTwo(this.orderItems[index].taxableAmount * (1 - this.orderItems[index].discount / 100) * this.orderItems[index].igstRate / 100))
+                    this.$set(this.orderItems[index], "totalAmount", this.roundToTwo(this.orderItems[index].taxableAmount * (1 - this.orderItems[index].discount / 100) + this.orderItems[index].cgstAmount + this.orderItems[index].sgstAmount + this.orderItems[index].igstAmount))
                     this.orderItems.__ob__.dep.notify()
 
                     var totbt = 0
@@ -611,7 +614,9 @@
                     var totsgst = 0
                     var totgst = 0
                     var totat = 0
+                    var totdiscount = 0
                     for (var i = 0; i < this.orderItems.length; i++) {
+                        totdiscount = this.orderItems[i].taxableAmount * this.orderItems[i].discount / 100
                         totbt += this.orderItems[i].taxableAmount
                         totcgst += this.orderItems[i].cgstAmount
                         totsgst += this.orderItems[i].sgstAmount
@@ -621,11 +626,11 @@
                     }
 
                     this.totalBeforeTaxAmount = totbt.toFixed(2)
-                    this.totalCGST = totcgst
-                    this.totalSGST = totsgst
-                    this.totalIGST = totigst
+                    this.totalCGST = totcgst.toFixed(2)
+                    this.totalSGST = totsgst.toFixed(2)
+                    this.totalIGST = totigst.toFixed(2)
                     this.totalGST = totgst.toFixed(2)
-                    this.totalAfterTaxAmount = Math.round(totat)
+                    this.totalAfterTaxAmount = Math.round(totat, 2)
                     this.roundOff = (this.totalAfterTaxAmount - totat).toFixed(2)
 
                 } else {
@@ -672,6 +677,10 @@
                     this.$set(this.showOrderItem, i, true)
                     $(field).removeClass("fa-plus-square").addClass("fa-minus-square")
                 }
+            },
+
+            roundToTwo: function (num) {
+                return +(Math.round(num + "e+2") + "e-2");
             }
 
 

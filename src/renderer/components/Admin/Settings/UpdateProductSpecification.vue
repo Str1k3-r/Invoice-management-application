@@ -33,6 +33,9 @@
 </template>
 
 <script>
+
+    import dbUtils from "../../../db";
+
     export default {
         name: "UpdateProductSpecification",
         props: ['pS'],
@@ -56,7 +59,18 @@
                 if(this.productName != '' && this.fields != ''){
                     var fieldsData = this.parseFields()
                     if(fieldsData.indexOf('Product Name') > -1){
-                        this.closeandrefresh()
+                        var instance = this
+
+                        function callback(msg) {
+                            if (msg == 'Not Updated') {
+                                instance.$snackbar.open("Product Specification could not be updated")
+                            } else {
+                                instance.$toast.open(msg)
+                                instance.closeandrefresh()
+                            }
+                        }
+
+                        dbUtils.updateProductSpecification(this.$props.pS._id, this.productName, fieldsData, callback)
                     } else {
                         document.getElementById('fields').focus()
                     }

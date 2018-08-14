@@ -45,6 +45,8 @@
 </template>
 
 <script>
+    import dbUtils from "../../../db";
+
     export default {
         name: "AddHSNCode",
         data: function () {
@@ -67,7 +69,18 @@
 
             save: function () {
                 if(this.hsnCode != 0){
-                    this.closeandrefresh()
+                    var instance = this
+
+                    function callback(msg) {
+                        if (msg == 'Not Added') {
+                            instance.$snackbar.open("HSN Code could not be added")
+                        } else {
+                            instance.$toast.open(msg)
+                            instance.closeandrefresh()
+                        }
+                    }
+
+                    dbUtils.addHSNCode(this.hsnCode, this.cgst, this.sgst, this.igst, callback)
                     //call save
                 } else {
                         document.getElementById('hsnCode').focus()

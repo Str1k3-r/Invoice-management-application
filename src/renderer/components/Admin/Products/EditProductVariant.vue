@@ -125,7 +125,18 @@
             },
 
             save: function () {
+                var instance = this
 
+                function callback(msg) {
+                    if (msg == 'Not Added') {
+                        instance.$snackbar.open("Product could not be added")
+                    } else {
+                        instance.$toast.open(msg)
+                        instance.closeandrefresh()
+                    }
+                }
+
+                dbUtils.updateProduct(this.$props.pV._id, this.productName, this.fields, this.valuefields, callback)
             },
 
             getKey: function (obj, val) {
@@ -133,7 +144,7 @@
             },
 
             watchAndSuggest: function (field) {
-                var productName = document.getElementById("editPV-select").value
+                var productName = this.$props.pV.productName
                 var value = document.getElementById(field).value
                 var re = new RegExp("" + value.toLowerCase() + ".*");
 

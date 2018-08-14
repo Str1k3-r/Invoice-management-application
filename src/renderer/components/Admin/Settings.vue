@@ -34,9 +34,17 @@
                         </template>
 
                         <template slot="detail" slot-scope="props">
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click="deleteProductSpecification(props.row._id)">DELETE</button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditPS(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </b-table>
@@ -47,6 +55,8 @@
                 </button>
                 <add-product-specification v-if="showPS" @closePS="hideAddPS"
                                            @reloadPS="refreshPS"></add-product-specification>
+                <update-product-specification v-if="editPS" :pS="selectedItem" @closeEditPS="hideEditPS"
+                                              @reloadPS="refreshPS"></update-product-specification>
             </div>
 
             <div id="settings-hsnCodes">
@@ -83,10 +93,19 @@
                         </template>
 
                         <template slot="detail" slot-scope="props">
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click="deleteHSNCode(props.row._id)">DELETE</button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditHSNC(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
+
                         </template>
                     </b-table>
                 </section>
@@ -94,6 +113,8 @@
 
                 <button id="addHSNCode" @click.prevent="showAddHSNC"><i class="fa fa-plus"/>ADD HSN CODE</button>
                 <add-hsn-code v-if="showHSNC" @closeHSNC="hideAddHSNC" @reloadHSNC="refreshHSNC"></add-hsn-code>
+                <update-hsn-code v-if="editHSNC" :hC="selectedItem" @closeEditHSNC="hideEditHSNC"
+                                 @reloadHSNC="refreshHSNC"></update-hsn-code>
 
             </div>
 
@@ -183,13 +204,37 @@
                 })
             },
 
-            deleteProductSpecification: function (productSpecification) {
-                console.log("DELETE", productSpecification)
+            deleteProductSpecification: function (id) {
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == "Found") {
+                        instance.productSpecifications = instance.productSpecifications.filter((spec) => {
+                            return spec._id != id
+                        })
+                    } else {
+                        this.$snackbar.open("PS not found!")
+                    }
+                }
+
+                dbUtils.deleteProductSpecification(id, callback)
             },
 
 
-            deleteHSNCode: function (HSNCode) {
-                console.log("DELETE", HSNCode)
+            deleteHSNCode: function (id) {
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == "Found") {
+                        instance.hsnCodes = instance.hsnCodes.filter((hsn) => {
+                            return hsn._id != id
+                        })
+                    } else {
+                        this.$snackbar.open("HSN Code not found!")
+                    }
+                }
+
+                dbUtils.deleteHSNCode(id, callback)
             },
 
 
@@ -306,52 +351,6 @@
         margin-bottom: 50px;
     }
 
-    .productSpecification-table {
-        width: 90%;
-        padding: 15px;
-        margin-bottom: 30px;
-    }
-
-    .productSpecification-table th {
-        background: rgb(244, 245, 249);
-        font-weight: bold;
-        font-size: 13px;
-        padding: 15px;
-    }
-
-    .productSpecification-table td {
-        border-radius: 5px;
-        color: darkslategray;
-        font-size: 12px;
-        padding: 15px;
-        font-weight: lighter;
-        border-right: solid 1px rgb(244, 245, 249);
-        border-left: solid 1px rgb(244, 245, 249);
-        border-bottom: solid 1px rgb(244, 245, 249);
-    }
-
-    .table-striped > tbody > tr:nth-child(odd) > td,
-    .table-striped > tbody > tr:nth-child(odd) > th {
-        background-color: white;
-    }
-
-    .table-striped > tbody > tr:nth-child(even) > td,
-    .table-striped > tbody > tr:nth-child(even) > th {
-        background-color: rgba(244, 245, 249, 0.5);
-    }
-
-    .delete, .edit {
-        color: rgba(2, 170, 176, 1);
-        background: white;
-        outline: none;
-        text-decoration: none;
-        margin-left: 30px;
-        margin-right: 60px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        border: none;
-    }
-
     #settings-hsnCodes {
         padding: 30px;
         width: 100%;
@@ -359,30 +358,6 @@
         background: white;
         border-radius: 3px;
         margin-bottom: 50px;
-    }
-
-    .hsncode-table {
-        width: 90%;
-        padding: 15px;
-        margin-bottom: 30px;
-    }
-
-    .hsncode-table th {
-        background: rgb(244, 245, 249);
-        font-weight: bold;
-        font-size: 13px;
-        padding: 15px;
-    }
-
-    .hsncode-table td {
-        border-radius: 5px;
-        color: darkslategray;
-        font-size: 12px;
-        padding: 15px;
-        font-weight: lighter;
-        border-right: solid 1px rgb(244, 245, 249);
-        border-left: solid 1px rgb(244, 245, 249);
-        border-bottom: solid 1px rgb(244, 245, 249);
     }
 
     #addHSNCode i, #addProductSpecification i {
@@ -517,6 +492,135 @@
         padding-top: 350px;
         width: 100%;
         margin-bottom: 50px;
+    }
+
+    .hula1 {
+        padding-left: 30px;
+        padding-right: 30px;
+        width: 100%;
+    }
+
+    .hulu1 {
+        width: 50%;
+    }
+
+    .pendingOrders-table {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+
+    .pendingOrders-table th, .table thead {
+        background: rgb(244, 245, 249);
+        font-weight: bold;
+        font-size: 13px;
+        padding: 15px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .table thead th, .table thead tr {
+        border: none;
+    }
+
+    .b-table {
+        padding: 0;
+        border-radius: 3px;
+    }
+
+    .b-table select, p {
+        display: none;
+    }
+
+    .b-table a {
+        font-size: 13px;
+        color: black;
+        padding: 4px;
+    }
+
+    .b-table .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .table .icon {
+        display: table;
+        margin-top: -15px;
+        visibility: visible;
+    }
+
+    .table thead .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .level .icon {
+        visibility: visible;
+        margin-top: -2px;
+        margin-right: 15px;
+        display: block;
+    }
+
+    .table > tbody > tr:nth-child(odd) > td,
+    .table > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table > tbody > tr:nth-child(even) > td,
+    .table > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .pendingOrders-table td {
+        border-radius: 5px;
+        color: darkslategray;
+        font-size: 12px;
+        padding: 15px;
+        font-weight: lighter;
+        border-right: solid 1px rgb(244, 245, 249);
+        border-left: solid 1px rgb(244, 245, 249);
+        border-bottom: solid 1px rgb(244, 245, 249);
+    }
+
+    .table-striped > tbody > tr:nth-child(odd) > td,
+    .table-striped > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table-striped > tbody > tr:nth-child(even) > td,
+    .table-striped > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .options button {
+        cursor: pointer;
+        border: none;
+        height: 35px;
+        outline: none;
+        font-weight: bold;
+        background: #E0E0E0; /*#e96868;*/
+        color: black;
+        border-radius: 3px;
+        box-shadow: none;
+        font-size: 12px;
+        transition: 0.5s;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .options button:focus {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options button:hover {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options i {
+        color: black;
+        margin-right: 10px;
     }
 
 

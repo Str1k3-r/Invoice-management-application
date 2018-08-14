@@ -34,6 +34,9 @@
 </template>
 
 <script>
+
+    import dbUtils from "../../../db"
+
     export default {
         name: "EditClient",
         props: ['C'],
@@ -57,6 +60,18 @@
 
             save: function () {
 
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == 'Not Added') {
+                        instance.$snackbar.open("Client could not be added")
+                    } else {
+                        instance.$toast.open(msg)
+                        instance.closeandrefresh()
+                    }
+                }
+
+                dbUtils.updateClient(this.$props.C._id, this.clientFieldValues["Client Name"], this.clientFieldValues["Address"], this.clientFieldValues["City"], this.clientFieldValues["State"], this.clientFieldValues["Pincode"], this.clientFieldValues["Phone No"], this.clientFieldValues["Mobile No"], this.clientFieldValues["GST UIN"], callback)
 
             },
 

@@ -9,17 +9,20 @@ var orderSchema = new Schema({
     orderPlacedDate: {type: Date},
     orderCompletedDate: {type: Date},
     orderStatus: {type:String},
-    totalBeforeTaxAmount: {type: Number},
-    totalCGST: {type: Number},
-    totalSGST: {type: Number},
-    totalIGST: {type: Number},
-    totalGST: {type: Number},
-    totalAfterTaxAmount: {type: Number},
-    roundOff: {type: Number},
     savedInvoices: [{type: mongoose.Schema.Types.ObjectId, ref: 'invoiceModel'}],
     savedPaymentSlips: [{type: mongoose.Schema.Types.ObjectId, ref: 'paymentSlipModel'}],
     savedTransportSlips: [{type: mongoose.Schema.Types.ObjectId, ref: 'transportSlipModel'}]
 })
+
+
+orderSchema.pre('remove', function (callback) {
+    this.model('orderItemModel').deleteMany({order: this._id}, callback);
+    this.model('invoiceModel').deleteMany({order: this._id}, callback);
+    this.model('paymentSlipModel').deleteMany({order: this._id}, callback);
+    this.model('transportSlipModel').deleteMany({order: this._id}, callback);
+    this.model('clientModel').updateOne({_id: this.client._id}, {$pull: {order: {_id: this._id}}}, callback)
+
+});
 
 
 var orderModel = mongoose.model('orderModel', orderSchema)

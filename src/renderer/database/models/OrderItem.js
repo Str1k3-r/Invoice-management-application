@@ -5,7 +5,7 @@ var orderItemSchema = new Schema({
     productDescription: {type: String},
     itemStatus: {type: String},
     hsnCode: {type: Number},
-    size: {type: Number},
+    size: {type: String},
     discount: {type: Number},
     quantity: {type: Number},
     amount: {type: Number},
@@ -21,6 +21,11 @@ var orderItemSchema = new Schema({
     order: {type: mongoose.Schema.Types.ObjectId, ref: 'orderModel'},
     invoice: {type: mongoose.Schema.Types.ObjectId, ref: 'invoiceModel'},
 })
+
+orderItemSchema.pre('remove', function (callback) {
+    this.model('invoiceModel').updateOne({orderItems: {"$in": [this._id]}}, {$pull: {orderItems: {_id: this._id}}}, callback)
+    this.model('orderModel').updateOne({orderItems: {"$in": [this._id]}}, {$pull: {orderItems: {_id: this._id}}}, callback)
+});
 
 
 var orderItemModel = mongoose.model('orderItemModel', orderItemSchema)

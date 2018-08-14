@@ -11,7 +11,7 @@
         methods: {
             checkLogin: function () {
                 if (lUtils.getLoginConfig().isLoggedIn) {
-                    this.$router.push('/admin/products')
+                    this.$router.push('/admin/clients')
                 } else {
                     this.$router.push('/login')
                 }

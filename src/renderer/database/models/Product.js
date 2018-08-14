@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 
 var productSchema = new Schema({
-    productName: {type: String, required: true, unique:true},
+    productName: {type: String, required: true},
     fields: [Schema.Types.Mixed]
 
 }, {strict:false})

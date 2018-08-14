@@ -12,7 +12,7 @@
 
 
             <div id="orders-pendingOrders">
-                <h4> PENDING ORDERS</h4>
+                <h4> PENDING ORDERS </h4>
                 <section>
                     <b-table class="pendingOrders-table"
                              :data="pendingOrders"
@@ -23,7 +23,9 @@
                              :default-sort-direction="defaultSortDirection"
                              default-sort="orderPlacedOn"
                              detailed
-                             detail-key="_id">
+                             detail-key="_id"
+                             @click="callViewOrder"
+                    >
 
                         <template slot-scope="props">
                             <b-table-column field="orderNumber" label="Order Number" width="40">
@@ -50,15 +52,40 @@
 
 
                         <template slot="detail" slot-scope="props">
-                            <div>
-                                Order Items
-                                <br>
-                                <pre style="font-family: Montserrat; font-size: 11px">{{ props.row.orderDesc }}</pre>
+                            <div class="row hula1" v-for="orderItem in props.row.orderItems">
+                                <div class="column hulu2">
+                                    <h5>Product</h5>
+                                    <span>{{orderItem.productDescription}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Size</h5>
+                                    <span>{{orderItem.size}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Quantity</h5>
+                                    <span>{{orderItem.quantity}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Total Amount</h5>
+                                    <span>Rs. {{orderItem.totalAmount}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Item Status</h5>
+                                    <span>{{orderItem.itemStatus}}</span>
+                                </div>
                             </div>
 
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="deleteOrder(props.row._id)">DELETE</button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditPV(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </b-table>
@@ -79,7 +106,9 @@
                              :default-sort-direction="defaultSortDirection"
                              default-sort="orderPlacedOn"
                              detailed
-                             detail-key="_id">
+                             detail-key="_id"
+                             @click="callViewOrder"
+                    >
 
                         <template slot-scope="props">
                             <b-table-column field="orderNumber" label="Order Number" width="40">
@@ -106,15 +135,40 @@
                         </template>
 
                         <template slot="detail" slot-scope="props">
-                            <div>
-                                Order Items
-                                <br>
-                                <pre style="font-family: Montserrat; font-size: 11px">{{ props.row.orderDesc }}</pre>
+                            <div class="row hula1" v-for="orderItem in props.row.orderItems">
+                                <div class="column hulu2">
+                                    <h5>Product</h5>
+                                    <span>{{orderItem.productDescription}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Size</h5>
+                                    <span>{{orderItem.size}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Quantity</h5>
+                                    <span>{{orderItem.quantity}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Total Amount</h5>
+                                    <span>Rs. {{orderItem.totalAmount}}</span>
+                                </div>
+                                <div class="column hulu2">
+                                    <h5>Item Status</h5>
+                                    <span>{{orderItem.itemStatus}}</span>
+                                </div>
                             </div>
 
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="deleteOrder(props.row._id)">DELETE</button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditPV(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </b-table>
@@ -132,13 +186,11 @@
 
     import dbUtils from "../../db"
     import AddOrder from './Orders/AddOrder'
-    import Datepicker from 'vuejs-datepicker'
 
     export default {
         name: "Orders",
         components: {
             addOrder: AddOrder,
-            Datepicker
         },
 
         data: function () {
@@ -170,9 +222,29 @@
                         allOrders[i].clientDesc = allOrders[i].client['clientName'] + ", " + allOrders[i].client.city + ", " + allOrders[i].client.state
                         allOrders[i].orderDesc = []
                         allOrders[i].orderPlacedOn = this.formatDate(allOrders[i].orderPlacedDate).toString()
+                        var totbt = 0
+                        var totcgst = 0
+                        var totigst = 0
+                        var totsgst = 0
+                        var totgst = 0
+                        var totat = 0
                         for (var j = 0; j < allOrders[i].orderItems.length; j++) {
+                            totbt += allOrders[i].orderItems[j].taxableAmount
+                            totcgst += allOrders[i].orderItems[j].cgstAmount
+                            totsgst += allOrders[i].orderItems[j].sgstAmount
+                            totigst += allOrders[i].orderItems[j].igstAmount
+                            totgst += allOrders[i].orderItems[j].cgstAmount + allOrders[i].orderItems[j].sgstAmount + allOrders[i].orderItems[j].igstAmount
+                            totat += allOrders[i].orderItems[j].totalAmount
                             allOrders[i].orderDesc.push((allOrders[i].orderItems[j].productDescription + '  Size: ' + allOrders[i].orderItems[j].size + '  Qty: ' + allOrders[i].orderItems[j].quantity + ' Total Amount: Rs ' + allOrders[i].orderItems[j].totalAmount + '  Status: ' + allOrders[i].orderItems[j].itemStatus))
                         }
+
+                        allOrders[i].totalBeforeTaxAmount = totbt.toFixed(2)
+                        allOrders[i].totalCGST = totcgst.toFixed(2)
+                        allOrders[i].totalSGST = totsgst.toFixed(2)
+                        allOrders[i].totalIGST = totigst.toFixed(2)
+                        allOrders[i].totalGST = totgst.toFixed(2)
+                        allOrders[i].totalAfterTaxAmount = Math.round(totat, 2)
+                        allOrders[i].roundOff = (this.totalAfterTaxAmount - totat).toFixed(2)
                     }
                     this.allOrders = allOrders
                     this.allOrders.sort((a, b) => {
@@ -233,6 +305,30 @@
                 }
             },
 
+            callViewOrder: function (model) {
+                this.$router.push('/admin/vieworder/' + model._id)
+            },
+
+            deleteOrder: function (id) {
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == "Found") {
+                        instance.allOrders = instance.allOrders.filter((order) => {
+                            return order._id != id
+                        })
+
+                        instance.pendingOrders = instance.pendingOrders.filter((order) => {
+                            return order._id != id
+                        })
+                    } else {
+                        this.$snackbar.open("Order not found!")
+                    }
+                }
+
+                dbUtils.deleteOrderById(id, callback)
+            }
+
         },
 
 
@@ -275,6 +371,19 @@
     .orders-subwrapper h4 {
         font-weight: bold;
         font-size: 14px;
+    }
+
+    .orders-subwrapper h5 {
+        margin-top: 30px;
+        font-weight: bold;
+        color: darkslategray;
+        font-size: 13px;
+    }
+
+    .orders-subwrapper span {
+        margin-top: 30px;
+        color: darkslategray;
+        font-size: 13px;
     }
 
     #orders-pendingOrders {
@@ -425,6 +534,7 @@
     }
 
     .options button {
+        margin-left: -30px;
         cursor: pointer;
         border: none;
         height: 35px;
@@ -493,5 +603,22 @@
         box-shadow: none;
         border-radius: 3px;
     }
+
+    .hula1 {
+        padding-left: 30px;
+        padding-right: 30px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+    .hulu1 {
+        width: 50%;
+    }
+
+    .hulu2 {
+        width: 20%;
+    }
+
+
 
 </style>

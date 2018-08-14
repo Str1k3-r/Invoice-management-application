@@ -21,7 +21,9 @@
                              :default-sort-direction="defaultSortDirection"
                              default-sort="orderPlacedOn"
                              detailed
-                             detail-key="_id">
+                             detail-key="_id"
+                             @click="showViewC"
+                    >
 
                         <template slot-scope="props">
 
@@ -56,15 +58,25 @@
                         </template>
 
                         <template slot="detail" slot-scope="props">
-                            <div class="options">
-                                <button @click.prevent="">DELETE</button>
-                                <button @click.prevent="">EDIT</button>
+                            <div class="row hula1">
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click="deleteClient(props.row._id, props.row.orders, props.row.invoices)">
+                                            DELETE
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="column hulu1">
+                                    <div class="options">
+                                        <button @click.prevent="showEditC(props.row)">EDIT</button>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </b-table>
                 </section>
-
-                <view-client v-if="viewC" @closeViewC="hideViewC" :C="selectedItem"></view-client>
+                <edit-client v-if="editC" @closeEditC="hideEditC" @reloadEditC="reloadEditC"
+                             :C="selectedItem"></edit-client>
             </div>
         </div>
 
@@ -76,7 +88,6 @@
     import dbUtils from "../../db"
     import AddClient from "./Clients/AddClient"
     import EditClient from './Clients/EditClient'
-    import ViewClient from './Clients/ViewClient'
 
     export default {
         name: "Products",
@@ -84,7 +95,6 @@
         components: {
             addClient: AddClient,
             editClient: EditClient,
-            viewClient: ViewClient
         },
 
         data: function () {
@@ -112,7 +122,6 @@
                 this.dataLoaded = false
                 dbUtils.getAllClients().then((clients, err) => {
                     if (err) throw err
-
                     this.clients = clients
                     this.dataLoaded = true
 
@@ -128,19 +137,11 @@
                 this.editC = false
             },
 
-            hideViewC: function () {
-                this.selectedItem = {}
-                this.viewC = false
-            },
 
             showAddC: function () {
                 this.addC = true
             },
 
-            showViewC: function (client) {
-                this.selectedItem = client
-                this.viewC = true
-            },
 
             showEditC: function (client) {
                 this.selectedItem = client
@@ -149,12 +150,28 @@
 
             reloadAddC: function () {
                 this.fetchAll()
-                this.hideAddPV()
+                this.hideAddC()
             },
 
             reloadEditC: function () {
                 this.fetchAll()
-                this.hideEditPV()
+                this.hideEditC()
+            },
+
+            deleteClient: function (id) {
+                var instance = this
+
+                function callback(msg) {
+                    if (msg == "Found") {
+                        instance.clients = instance.clients.filter((client) => {
+                            return client._id != id
+                        })
+                    } else {
+                        this.$snackbar.open("HSN Code not found!")
+                    }
+                }
+
+                dbUtils.deleteClient(id, callback)
             }
         },
 
@@ -164,7 +181,7 @@
     }
 </script>
 
-<style scoped>
+<style>
 
     .loading {
         display: flex;
@@ -295,5 +312,132 @@
         margin-right: 10px;
     }
 
+    .hula1 {
+        padding-left: 30px;
+        padding-right: 30px;
+        width: 100%;
+    }
 
+    .hulu1 {
+        width: 50%;
+    }
+
+    .pendingOrders-table {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+
+    .pendingOrders-table th, .table thead {
+        background: rgb(244, 245, 249);
+        font-weight: bold;
+        font-size: 13px;
+        padding: 15px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .table thead th, .table thead tr {
+        border: none;
+    }
+
+    .b-table {
+        padding: 0;
+        border-radius: 3px;
+    }
+
+    .b-table select, p {
+        display: none;
+    }
+
+    .b-table a {
+        font-size: 13px;
+        color: black;
+        padding: 4px;
+    }
+
+    .b-table .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .table .icon {
+        display: table;
+        margin-top: -15px;
+        visibility: visible;
+    }
+
+    .table thead .icon {
+        display: none;
+        visibility: hidden;
+    }
+
+    .level .icon {
+        visibility: visible;
+        margin-top: -2px;
+        margin-right: 15px;
+        display: block;
+    }
+
+    .table > tbody > tr:nth-child(odd) > td,
+    .table > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table > tbody > tr:nth-child(even) > td,
+    .table > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .pendingOrders-table td {
+        border-radius: 5px;
+        color: darkslategray;
+        font-size: 12px;
+        padding: 15px;
+        font-weight: lighter;
+        border-right: solid 1px rgb(244, 245, 249);
+        border-left: solid 1px rgb(244, 245, 249);
+        border-bottom: solid 1px rgb(244, 245, 249);
+    }
+
+    .table-striped > tbody > tr:nth-child(odd) > td,
+    .table-striped > tbody > tr:nth-child(odd) > th {
+        background-color: white;
+    }
+
+    .table-striped > tbody > tr:nth-child(even) > td,
+    .table-striped > tbody > tr:nth-child(even) > th {
+        background-color: rgba(244, 245, 249, 0.5);
+    }
+
+    .options button {
+        cursor: pointer;
+        border: none;
+        height: 35px;
+        outline: none;
+        font-weight: bold;
+        background: #E0E0E0; /*#e96868;*/
+        color: black;
+        border-radius: 3px;
+        box-shadow: none;
+        font-size: 12px;
+        transition: 0.5s;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .options button:focus {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options button:hover {
+        outline: none;
+        transition: 0.5s;
+    }
+
+    .options i {
+        color: black;
+        margin-right: 10px;
+    }
 </style>
