@@ -5,8 +5,18 @@ var invoiceSchema = new Schema({
     orderNumber: {type:String},
     orderItems: [{type: mongoose.Schema.Types.ObjectId, ref: 'orderItemModel'}],
     billedTo: {type: mongoose.Schema.Types.ObjectId, ref: 'clientModel'},
-    shippedTo: {type: mongoose.Schema.Types.ObjectId, ref: 'clientModel'},
+    shippedTo: {
+        clientName: {type: String},
+        address1: {type: String},
+        city: {type: String},
+        state: {type: String},
+        phoneNo: {type: Number},
+        mobileNo: {type: Number},
+        gstUIN: {type: String},
+        pincode: {type: Number}
+    },
     orderPlacedBy: {type: String},
+    orderPlacedDate: {type: Date},
     reverseCharge: {type: String},
     transportationMode: {type:String},
     dateOfSupply: {type: Date},
@@ -18,13 +28,8 @@ var invoiceSchema = new Schema({
     transportationAgency: {type: String},
     numberOfPacking: {type: String},
     privateMarka: {type: String},
-    grNo: {type: String},
-    date: {type: Date},
-    freight: {type: String},
-    weight: {type: String},
-    msg: {type: String},
-    order: {type: mongoose.Schema.Types.ObjectId, ref: 'orderModel'}
-})
+    ewayBillNo: {type: String},
+}, {strict: false})
 
 
 var invoiceModel = mongoose.model('invoiceModel', invoiceSchema)

@@ -279,7 +279,6 @@
         mounted: function () {
             this.initializeAndClose()
             ipcRenderer.on('data-printed', (event, data) => {
-                console.log(data)
                 this.back()
             })
         },

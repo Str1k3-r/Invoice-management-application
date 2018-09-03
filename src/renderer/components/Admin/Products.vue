@@ -273,7 +273,7 @@
         font-size: 13px;
         padding: 15px;
         cursor: pointer;
-        border: none;
+        border: solid 1px darkslategrey;
     }
 
     .table thead th, .table thead tr {
@@ -334,9 +334,7 @@
         font-size: 12px;
         padding: 15px;
         font-weight: lighter;
-        border-right: solid 1px rgb(244, 245, 249);
-        border-left: solid 1px rgb(244, 245, 249);
-        border-bottom: solid 1px rgb(244, 245, 249);
+        border: solid 1px darkslategrey;
     }
 
     .table-striped > tbody > tr:nth-child(odd) > td,

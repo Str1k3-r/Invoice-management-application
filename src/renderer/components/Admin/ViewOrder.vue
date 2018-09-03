@@ -120,7 +120,7 @@
             <div class="order-details">
                 <h4>ORDER ITEMS</h4>
                 <div class="vieworder-secondarybutton">
-                    <button>TOGGLE ITEM STATUS</button>
+                    <button @click="toggleItemStatus">TOGGLE ITEM STATUS</button>
                     <button @click="print">PRINT T3</button>
                 </div>
                 <section class="view-order-details">
@@ -224,6 +224,37 @@
 
                     </b-table>
                 </section>
+
+                <h4 v-if="order.savedInvoices!=null">SAVED INVOICES</h4>
+                <section class="view-order-details">
+                    <b-table
+                            class="pendingOrders-table"
+                            :data="order.savedInvoices"
+                            default-sort="invoiceNumber"
+                            checkable
+                            :checked-rows.sync="checkedRows"
+                            detailed
+                            detail-key="_id"
+                            @click="viewInvoice"
+                    >
+
+                        <template slot-scope="props">
+                            <b-table-column field="invoiceNumber" label="Invoice No.">
+                                {{ props.row.invoiceNumber }}
+                            </b-table-column>
+
+                            <b-table-column field="invoiceDate" label="Invoice Date">
+                                {{ formatDate(props.row.invoiceDate) }}
+                            </b-table-column>
+
+                            <b-table-column field="billedTo" label="Billed To">
+                                {{ props.row.billedTo.clientName }}
+                            </b-table-column>
+
+                        </template>
+
+                    </b-table>
+                </section>
             </div>
         </div>
         <order-performa v-if="orderPerforma" @closeOrderPerforma="hideOrderPerforma" :order="order"></order-performa>
@@ -297,14 +328,30 @@
 
             print: function () {
                 var orderItems = []
+                var promises = []
+                //var d = new Date()
                 for (var i = 0; i < this.checkedRows.length; i++) {
+                    if (this.checkedRows[i].itemStatus != "Completed") {
+                        this.checkedRows[i].itemStatus = "Completed"
+                        this.checkedRows[i].fulfilledDate = new Date()
+                        promises.push(dbUtils.updateOrderItem(this.checkedRows[i]))
+                    }
                     orderItems.push(this.checkedRows[i].id)
+
                 }
+
+
+                console.log(orderItems)
                 if (orderItems.length == 0) {
 
                 } else {
-                    console.log(this.checkedRows, orderItems)
+
                     this.$router.push({path: "/bill/" + this.order._id, query: {orderItems: orderItems}})
+                    Promise.all(promises).then(() => {
+
+                        console.log("triggered")
+                        this.checkAndUpdateOrderStatus()
+                    })
                 }
 
             },
@@ -322,11 +369,70 @@
             },
 
             toggleItemStatus: function () {
-                for (var i = 0; i < this.checkedRows.length;) {
+                var promises = []
+                for (var i = 0; i < this.checkedRows.length; i++) {
                     if (this.checkedRows[i].itemStatus == "Pending") {
-                        this.checkedRows[i].itemStatus = "Complete"
+                        this.checkedRows[i].itemStatus = "Completed"
+                        this.checkedRows[i].fulfilledDate = new Date()
+                        var id = this.checkedRows[i].id
+                        var date = this.checkedRows[i].fulfilledDate
+                        $.each(this.order.orderItems, function () {
+                            if (this.id == id) {
+                                this.itemStatus = "Completed"
+                                this.fulfilledDate = date
+                            }
+                        });
+
+                    } else {
+                        this.checkedRows[i].itemStatus = "Pending"
+                        this.checkedRows[i].fulfilledDate = null
+                        var id = this.checkedRows[i].id
+                        $.each(this.order.orderItems, function () {
+                            if (this.id == id) {
+                                this.itemStatus = "Pending"
+                                this.fulfilledDate = null
+                            }
+                        });
+                    }
+
+                    promises.push(dbUtils.updateOrderItem(this.checkedRows[i]))
+                }
+
+                Promise.all(promises).then(() => {
+                    this.checkAndUpdateOrderStatus()
+                    console.log(this.order)
+                })
+            },
+
+            checkAndUpdateOrderStatus: function () {
+                var flag = false
+                for (var i = 0; i < this.order.orderItems.length; i++) {
+                    if (this.order.orderItems[i].itemStatus == "Pending") {
+                        flag = false
+                        break;
+                    } else {
+                        flag = true
                     }
                 }
+                console.log(flag)
+                if (flag) {
+                    if (this.order.orderStatus == "Pending") {
+                        this.order.orderStatus = "Completed"
+                        this.order.orderCompletedDate = new Date()
+                        dbUtils.updateOrderStatus(this.order._id, "Completed", this.order.orderCompletedDate)
+                    }
+                } else {
+                    this.order.orderStatus = "Pending"
+                    this.order.orderCompletedDate = null
+                    dbUtils.updateOrderStatus(this.order._id, "Pending", null)
+                }
+
+                this.order.__ob__.dep.notify()
+            },
+
+
+            viewInvoice: function (model) {
+                this.$router.push("/vbill/" + model._id)
             }
 
         },
@@ -529,7 +635,7 @@
         font-size: 13px;
         padding: 15px;
         cursor: pointer;
-        border: none;
+        border: solid 1px darkslategrey;
     }
 
     .table thead th, .table thead tr {
@@ -590,9 +696,7 @@
         font-size: 12px;
         padding: 15px;
         font-weight: lighter;
-        border-right: solid 1px rgb(244, 245, 249);
-        border-left: solid 1px rgb(244, 245, 249);
-        border-bottom: solid 1px rgb(244, 245, 249);
+        border: solid 1px darkslategrey;
     }
 
     .options {

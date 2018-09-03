@@ -52,6 +52,12 @@
                                 <datepicker v-model="dateOfSupply" name="dateOfSupply" id=""></datepicker>
                             </div>
                         </div>
+                        <div class="billI-Igroup" v-if="showEwayBill">
+                            <label for="ewayBillNo">E-Way Bill No.</label>
+                            <br/>
+                            <input type="text" id="ewayBillNo" name="ewayBillNo" class="f-control"
+                                   v-model="ewayBillNo"/>
+                        </div>
                         <div class="billI-Igroup">
                             <label for="placeOfSupply">Place of Supply</label>
                             <br/>
@@ -144,7 +150,7 @@
 
     export default {
         name: "BillInput",
-        props: ['order'],
+        props: ['order', 'showEwayBill'],
         components: {
             Datepicker
         },
@@ -162,6 +168,8 @@
                 transport: "",
                 numberOfPacking: "",
                 privateMarka: "",
+                showEwayBill: this.$props.showEwayBill,
+                ewayBillNo: ""
             }
         },
 
@@ -178,6 +186,8 @@
                     transport: instance.transport,
                     numberOfPacking: instance.numberOfPacking,
                     privateMarka: instance.privateMarka,
+                    ewayBillNo: instance.ewayBillNo
+
                 }
                 this.$emit("closebillI", data)
             },
@@ -190,14 +200,32 @@
                 var d = new Date()
                 this.invoiceNo = "SLU/" + d.getFullYear() + "-" + (d.getFullYear() + 1).toString().substr(-2) + "/"
                 this.billedToClient = this.$props.order.client
-                this.shippedToClient = this.$props.order.client
+                this.shippedToClient = this.shippedToClient = {
+                    clientName: this.$props.order.client.clientName,
+                    address1: this.$props.order.client.address1,
+                    city: this.$props.order.client.city,
+                    state: this.$props.order.client.state,
+                    phoneNo: this.$props.order.client.phoneNo,
+                    mobileNo: this.$props.order.client.mobileNo,
+                    gstUIN: this.$props.order.client.gstUIN,
+                    pincode: this.$props.order.client.pincode
+                }
             },
 
             loadClientFields: function () {
                 var stsbt = document.getElementById("shippedToSameAsBilledTo").value
                 if (stsbt == "YES") {
                     this.shippedToSameAsBilledTo = true
-                    this.billedToClient = this.shippedToClient
+                    this.shippedToClient = {
+                        clientName: this.billedToClient.clientName,
+                        address1: this.billedToClient.address1,
+                        city: this.billedToClient.city,
+                        state: this.billedToClient.state,
+                        phoneNo: this.billedToClient.phoneNo,
+                        mobileNo: this.billedToClient.mobileNo,
+                        gstUIN: this.billedToClient.gstUIN,
+                        pincode: this.billedToClient.pincode
+                    }
                 } else {
                     this.shippedToClient = {
                         clientName: "",

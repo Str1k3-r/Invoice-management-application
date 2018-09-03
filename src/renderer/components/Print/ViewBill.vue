@@ -37,20 +37,20 @@
                 <div class="row bill-hula1">
                     <div class="column bill-hulu1" style="margin-top: 10px">
                         <h6 style="font-weight: bold; font-size: 12px">REVERSE CHARGE -
-                            {{billInputData.reverseCharge}}</h6>
+                            {{invoice.reverseCharge}}</h6>
                     </div>
                     <div class="column bill-hulu1" style="margin-top: 10px">
                         <h6 style="font-weight: bold; font-size: 12px">TRANSPORT MODE -
-                            {{billInputData.transportMode}}</h6>
+                            {{invoice.transportMode}}</h6>
                     </div>
                 </div>
 
                 <div class="row bill-hula1" style="margin-top: -5px">
                     <div class="column bill-hulu1">
-                        <h6 style="font-weight: bold; font-size: 12px">INVOICE NO. - {{billInputData.invoiceNo}}</h6>
+                        <h6 style="font-weight: bold; font-size: 12px">INVOICE NO. - {{invoice.invoiceNo}}</h6>
                     </div>
                     <div class="column bill-hulu1">
-                        <h6 style="font-weight: bold; font-size: 12px">ORDER PLACED BY - {{order.orderPlacedBy}}</h6>
+                        <h6 style="font-weight: bold; font-size: 12px">ORDER PLACED BY - {{invoice.orderPlacedBy}}</h6>
                     </div>
                 </div>
 
@@ -65,7 +65,7 @@
                     </div>
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px">DATE OF SUPPLY -
-                            {{billInputData.dateOfSupply.toLocaleDateString('en-GB', {
+                            {{invoice.dateOfSupply.toLocaleDateString('en-GB', {
                             day : 'numeric',
                             month : 'short',
                             year : 'numeric'
@@ -75,15 +75,15 @@
 
                 <div class="row bill-hula1" style="margin-top: -5px">
                     <div class="column bill-hulu3">
-                        <h6 style="font-weight: bold; font-size: 12px">STATE - {{order.client.state}}</h6>
+                        <h6 style="font-weight: bold; font-size: 12px">STATE - {{invoice.billedTo.state}}</h6>
                     </div>
                     <div class="column bill-hulu3">
                         <h6 style="font-weight: bold; font-size: 12px">STATE CODE -
-                            {{stateCode(order.client.state)}}</h6>
+                            {{stateCode(invoice.billedTo.state)}}</h6>
                     </div>
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px">PLACE OF SUPPLY -
-                            {{billInputData.placeOfSupply}}</h6>
+                            {{invoice.placeOfSupply}}</h6>
                     </div>
                 </div>
             </div>
@@ -100,11 +100,11 @@
 
                 <div class="row bill-hula1" style="margin-top: -5px">
                     <div class="column bill-hulu1">
-                        <h6 style="font-weight: bold; font-size: 12px">NAME - {{order.client.clientName}}</h6>
+                        <h6 style="font-weight: bold; font-size: 12px">NAME - {{invoice.billedTo.clientName}}</h6>
                     </div>
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px">NAME -
-                            {{billInputData.shippedToClient.clientName}}</h6>
+                            {{invoice.shippedTo.clientName}}</h6>
                     </div>
                 </div>
 
@@ -113,14 +113,14 @@
                         <h6 style="font-weight: bold; font-size: 12px">ADDRESS -
                             <div style="margin-left: 80px; margin-top: -16px" class="row hula1">
                                 <div class="column bill-hulu2" style="margin-bottom: 5px">
-                                    {{order.client.address1}}
+                                    {{invoice.billedTo.address1}}
                                 </div>
                                 <div class="column bill-hulu1">
-                                    {{order.client.city}}
+                                    {{invoice.billedTo.city}}
                                 </div>
 
                                 <div class="column bill-hulu1">
-                                    PINCODE - {{order.client.pincode}}
+                                    PINCODE - {{invoice.billedTo.pincode}}
                                 </div>
                             </div>
                         </h6>
@@ -129,14 +129,14 @@
                         <h6 style="font-weight: bold; font-size: 12px">ADDRESS -
                             <div style="margin-left: 80px; margin-top: -16px" class="row hula1">
                                 <div class="column bill-hulu2" style="margin-bottom: 5px">
-                                    {{billInputData.shippedToClient.address1}}
+                                    {{invoice.shippedTo.address1}}
                                 </div>
                                 <div class="column bill-hulu1">
-                                    {{billInputData.shippedToClient.city}}
+                                    {{invoice.shippedTo.city}}
                                 </div>
 
                                 <div class="column bill-hulu1">
-                                    PINCODE - {{billInputData.shippedToClient.pincode}}
+                                    PINCODE - {{invoice.shippedTo.pincode}}
                                 </div>
                             </div>
                         </h6>
@@ -147,11 +147,11 @@
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px; margin-left: -15px">
                             <div class="row hula1">
-                                <div v-if="order.client.phoneNo != 0" class="column bill-hulu1">
-                                    PHONE NO - {{order.client.phoneNo}}
+                                <div v-if="invoice.billedTo.phoneNo != 0" class="column bill-hulu1">
+                                    PHONE NO - {{invoice.billedTo.phoneNo}}
                                 </div>
-                                <div v-if="order.client.mobileNo != 0" class="column bill-hulu1">
-                                    MOBILE NO - {{order.client.mobileNo}}
+                                <div v-if="invoice.billedTo.mobileNo != 0" class="column bill-hulu1">
+                                    MOBILE NO - {{invoice.billedTo.mobileNo}}
                                 </div>
                             </div>
                         </h6>
@@ -159,11 +159,11 @@
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px; margin-left: -15px">
                             <div class="row hula1">
-                                <div v-if="billInputData.shippedToClient.phoneNo != 0" class="column bill-hulu1">
-                                    PHONE NO - {{billInputData.shippedToClient.phoneNo}}
+                                <div v-if="invoice.shippedTo.phoneNo != 0" class="column bill-hulu1">
+                                    PHONE NO - {{invoice.shippedTo.phoneNo}}
                                 </div>
-                                <div v-if="billInputData.shippedToClient.mobileNo != 0" class="column bill-hulu1">
-                                    MOBILE NO - {{billInputData.shippedToClient.mobileNo}}
+                                <div v-if="invoice.shippedTo.mobileNo != 0" class="column bill-hulu1">
+                                    MOBILE NO - {{invoice.shippedTo.mobileNo}}
                                 </div>
                             </div>
                         </h6>
@@ -175,10 +175,10 @@
                         <h6 style="font-weight: bold; font-size: 12px; margin-left: -15px">
                             <div class="row hula1">
                                 <div class="column bill-hulu1">
-                                    STATE - {{order.client.state}}
+                                    STATE - {{invoice.billedTo.state}}
                                 </div>
                                 <div class="column bill-hulu1">
-                                    STATE CODE - {{stateCode(order.client.state)}}
+                                    STATE CODE - {{stateCode(invoice.billedTo.state)}}
                                 </div>
                             </div>
                         </h6>
@@ -187,10 +187,10 @@
                         <h6 style="font-weight: bold; font-size: 12px; margin-left: -15px">
                             <div class="row hula1">
                                 <div class="column bill-hulu1">
-                                    STATE - {{billInputData.shippedToClient.state}}
+                                    STATE - {{invoice.shippedTo.state}}
                                 </div>
                                 <div class="column bill-hulu1">
-                                    STATE CODE - {{stateCode(billInputData.shippedToClient.state)}}
+                                    STATE CODE - {{stateCode(invoice.shippedTo.state)}}
                                 </div>
                             </div>
                         </h6>
@@ -201,12 +201,12 @@
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px; background: black; color: white">
                             GSTIN -
-                            {{order.client.gstUIN}}</h6>
+                            {{invoice.billedTo.gstUIN}}</h6>
                     </div>
                     <div class="column bill-hulu1">
                         <h6 style="font-weight: bold; font-size: 12px; background: black; color: white">
                             GSTIN -
-                            {{billInputData.shippedToClient.gstUIN}}</h6>
+                            {{invoice.shippedTo.gstUIN}}</h6>
                     </div>
                 </div>
             </div>
@@ -214,7 +214,7 @@
                 <section class="view-order-details">
                     <b-table class="bill-table"
                              style="font-size: 8px"
-                             :data="order.orderItems">
+                             :data="invoice.orderItems">
                         <template slot-scope="props">
 
                             <b-table-column field="productDescription" label="Product">
@@ -289,33 +289,34 @@
                         <div class="row bill-hula1">
                             <div class="column bill-hulu2">
                                 <span style="margin-right: 15px"><strong>NET AMOUNT IN WORDS:</strong></span>
-                                <span>₹{{numberToWords(order.totalAfterTaxAmount)}}</span>
+                                <span>₹{{numberToWords(invoice.totalAfterTaxAmount)}}</span>
                             </div>
 
-                            <div class="row bill-hula1" style="margin-left: 0px; margin-top: -5px">
-                                <div class="column bill-hulu6">
+                            <div class="column bill-hulu1">
+                                <div class="column bill-hulu1">
                                     <span style="margin-right: 15px"><strong>OUR BANKERS: </strong> </span>
                                     <span>Bank of Baroda</span>
                                 </div>
 
-                                <div class="column bill-hulu6">
+                                <div class="column bill-hulu1">
                                     <span style="margin-right: 15px"><strong>RTGS/NEFT/IFSC Code: </strong> </span>
                                     <span>BARB0ADARSH</span>
                                 </div>
-
-                                <div class="column bill-hulu6">
-                                    <span style="margin-right: 15px"><strong>ACCOUNT NO.: </strong> </span>
-                                    <span><strong>18900400000254</strong></span>
-                                </div>
                             </div>
+
+                            <div class="column bill-hulu1">
+                                <span style="margin-right: 15px"><strong>ACCOUNT NO.: </strong> </span>
+                                <span><strong>18900400000254</strong></span>
+                            </div>
+
 
                             <div class="column bill-hulu1">
                                 <span style="margin-right: 15px"><strong>ORDER NUMBER: </strong> </span>
-                                <span>{{order.orderNumber}}</span>
+                                <span>{{invoice.orderNumber}}</span>
                             </div>
                             <div class="column bill-hulu1">
                                 <span style="margin-right: 15px"><strong>ORDER DATE: </strong> </span>
-                                <span>{{order.orderPlacedDate.toLocaleDateString('en-GB', {
+                                <span>{{invoice.orderPlacedDate.toLocaleDateString('en-GB', {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric'
@@ -324,22 +325,22 @@
 
                             <div class="column bill-hulu2">
                                 <span style="margin-right: 15px"><strong>TRANSPORT:</strong></span>
-                                <span>{{billInputData.transport}}</span>
+                                <span>{{invoice.transport}}</span>
                             </div>
 
                             <div class="column bill-hulu2">
                                 <span style="margin-right: 15px"><strong>NO. OF PACKING:</strong></span>
-                                <span>{{billInputData.numberOfPacking}}</span>
+                                <span>{{invoice.numberOfPacking}}</span>
                             </div>
 
                             <div class="column bill-hulu2">
                                 <span style="margin-right: 15px"><strong>PRIVATE MARKA:</strong></span>
-                                <span>{{billInputData.privateMarka}}</span>
+                                <span>{{invoice.privateMarka}}</span>
                             </div>
 
                             <div class="column bill-hulu2" v-if="showEwayBill">
                                 <span style="margin-right: 15px"><strong>E-WAY BILL NO.:</strong></span>
-                                <span>{{billInputData.ewayBillNo}}</span>
+                                <span>{{invoice.ewayBillNo}}</span>
                             </div>
 
 
@@ -350,27 +351,27 @@
                             <tbody style="font-size: 12px; margin-top: 5px">
                             <tr>
                                 <td><strong>GRAND TOTAL</strong></td>
-                                <td>₹{{order.totalBeforeTaxAmount}}</td>
+                                <td>₹{{invoice.totalBeforeTaxAmount}}</td>
                             </tr>
                             <tr>
                                 <td><strong>TOTAL DISCOUNT</strong></td>
-                                <td>₹{{order.totalDiscount}}</td>
+                                <td>₹{{invoice.totalDiscount}}</td>
                             </tr>
                             <tr>
                                 <td><strong>ADD CGST</strong></td>
-                                <td>₹{{order.totalCGST}}</td>
+                                <td>₹{{invoice.totalCGST}}</td>
                             </tr>
                             <tr>
                                 <td><strong>ADD SGST</strong></td>
-                                <td>₹{{order.totalSGST}}</td>
+                                <td>₹{{invoice.totalSGST}}</td>
                             </tr>
                             <tr>
                                 <td><strong>ADD IGST</strong></td>
-                                <td>₹{{order.totalIGST}}</td>
+                                <td>₹{{invoice.totalIGST}}</td>
                             </tr>
                             <tr>
                                 <td><strong>NET AMOUNT</strong></td>
-                                <td>₹{{order.totalAfterTaxAmount}}</td>
+                                <td>₹{{invoice.totalAfterTaxAmount}}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -396,8 +397,6 @@
             </div>
         </div>
 
-        <bill-input v-if="openBillInput" :order="order" :showEwayBill="showEwayBill"
-                    @closebillI="closeBillInput"></bill-input>
     </div>
 </template>
 
@@ -409,32 +408,23 @@
 
     export default {
         name: "Bill",
-        components: {
-            billInput: BillInput
-        },
         data: function () {
             return {
                 invoiceDate: null,
                 copy: "TRANSPORT COPY",
                 id: this.$route.params.id,
                 dataLoaded: false,
-                order: null,
+                invoice: {},
                 orderItems: [],
-                openBillInput: false,
-                billInputData: null,
-                showEwayBill: false
             }
         },
 
         methods: {
-            loadOrderData: function () {
+            loadInvoiceData: function () {
                 this.invoiceDate = new Date()
-                this.orderItems = this.$route.query.orderItems
-                dbUtils.getOrderById(this.id).then((order) => {
-                    this.order = order['0']
-                    this.order.orderItems = this.order.orderItems.filter((orderItem) => {
-                        return this.orderItems.indexOf(orderItem.id) >= 0
-                    })
+                this.invoice.shippedTo = {}
+                dbUtils.getInvoiceById(this.id).then((invoice) => {
+                    this.invoice = invoice['0']
                     var totbt = 0
                     var totcgst = 0
                     var totigst = 0
@@ -442,34 +432,28 @@
                     var totgst = 0
                     var totat = 0
                     var totdiscount = 0
-                    console.log(this.order.orderItems)
-                    for (var j = 0; j < this.order.orderItems.length; j++) {
-                        this.order.orderItems[j]._id = this.order.orderItems[j].id
-                        this.order.orderItems[j].number = j + 1
-                        totdiscount += this.order.orderItems[j].taxableAmount * this.order.orderItems[j].discount / 100
-                        totbt += this.order.orderItems[j].taxableAmount
-                        totcgst += this.order.orderItems[j].cgstAmount
-                        totsgst += this.order.orderItems[j].sgstAmount
-                        totigst += this.order.orderItems[j].igstAmount
-                        totgst += this.order.orderItems[j].cgstAmount + this.order.orderItems[j].sgstAmount + this.order.orderItems[j].igstAmount
-                        totat += this.order.orderItems[j].totalAmount
+                    for (var j = 0; j < this.invoice.orderItems.length; j++) {
+                        this.invoice.orderItems[j].number = j + 1
+                        totdiscount += this.invoice.orderItems[j].taxableAmount * this.invoice.orderItems[j].discount / 100
+                        totbt += this.invoice.orderItems[j].taxableAmount
+                        totcgst += this.invoice.orderItems[j].cgstAmount
+                        totsgst += this.invoice.orderItems[j].sgstAmount
+                        totigst += this.invoice.orderItems[j].igstAmount
+                        totgst += this.invoice.orderItems[j].cgstAmount + this.invoice.orderItems[j].sgstAmount + this.invoice.orderItems[j].igstAmount
+                        totat += this.invoice.orderItems[j].totalAmount
                         //this.order.orderDesc.push((this.order.orderItems[j].productDescription + '  Size: ' + this.order.orderItems[j].size + '  Qty: ' + this.order.orderItems[j].quantity + ' Total Amount: Rs ' + this.order.orderItems[j].totalAmount + '  Status: ' + this.order.orderItems[j].itemStatus))
                     }
 
-                    this.order.totalDiscount = totdiscount.toFixed(2)
-                    this.order.totalBeforeTaxAmount = totbt.toFixed(2)
-                    this.order.totalCGST = totcgst.toFixed(2)
-                    this.order.totalSGST = totsgst.toFixed(2)
-                    this.order.totalIGST = totigst.toFixed(2)
-                    this.order.totalGST = totgst.toFixed(2)
-                    this.order.totalAfterTaxAmount = Math.round(totat, 2)
-                    if (this.order.totalAfterTaxAmount >= 50000) {
-                        this.showEwayBill = true
-                    }
+                    this.invoice.totalDiscount = totdiscount.toFixed(2)
+                    this.invoice.totalBeforeTaxAmount = totbt.toFixed(2)
+                    this.invoice.totalCGST = totcgst.toFixed(2)
+                    this.invoice.totalSGST = totsgst.toFixed(2)
+                    this.invoice.totalIGST = totigst.toFixed(2)
+                    this.invoice.totalGST = totgst.toFixed(2)
+                    this.invoice.totalAfterTaxAmount = Math.round(totat, 2)
+                    console.log(this.invoice, this.invoice.shippedTo)
+                    this.dataLoaded = true
 
-
-                }).then(() => {
-                    this.showBillInput()
                 })
             },
 
@@ -574,26 +558,11 @@
                 return words_string + " Only";
             },
 
-            closeBillInput: function (data) {
-                this.openBillInput = false
-                this.billInputData = data
-                if (this.billInputData.dateOfSupply != null) {
-                    this.dataLoaded = true
-                } else {
-                    this.back()
-                }
-
-            },
-
-            showBillInput: function () {
-                this.openBillInput = true
-            },
 
             split: function (s) {
                 var arr = s.split(',')
                 return arr
             },
-
 
             stateCode: function (state) {
                 state = state.toUpperCase()
@@ -718,65 +687,18 @@
                 return code
             },
 
-
-            saveInvoice: function () {
-
-
-                var invoice = {}
-                var instance = this
-
-                invoice.shippedTo = this.billInputData.shippedToClient
-
-                console.log(invoice.shippedTo)
-
-                invoice.orderNumber = this.order.orderNumber
-                invoice.orderItems = this.order.orderItems
-                invoice.billedTo = this.order.client._id
-                invoice.orderPlacedBy = this.order.orderPlacedBy
-                invoice.orderPlacedDate = this.order.orderPlacedOn
-                invoice.reverseCharge = this.billInputData.reverseCharge
-                invoice.transportationMode = this.billInputData.transportMode
-                invoice.dateOfSupply = this.billInputData.dateOfSupply
-                invoice.placeOfSupply = this.billInputData.placeOfSupply
-                invoice.state = this.billInputData.shippedToClient.state
-                invoice.stateCode = this.stateCode(invoice.state)
-                invoice.invoiceNumber = this.billInputData.invoiceNo
-                invoice.invoiceDate = this.billInputData.invoiceDate
-                invoice.transportationAgency = this.billInputData.transport
-                invoice.numberOfPacking = this.billInputData.numberOfPacking
-                invoice.privateMarka = this.billInputData.privateMarka
-                invoice.ewayBillNo = this.billInputData.ewayBillNo
-
-                var instance = this
-
-                function callback(msg) {
-                    if (msg == 'Not Added') {
-                        instance.$snackbar.open("Client could not be added")
-                    } else {
-                        setTimeout(function () {
-                            instance.print()
-                        }, 100);
-                    }
-                }
-
-                dbUtils.addInvoice(invoice, this.order._id, callback)
-            }
-
         },
 
         mounted: function () {
-            this.loadOrderData()
+            this.loadInvoiceData()
             ipcRenderer.on('bill-printed', (event, data) => {
-
                 this.back()
             })
         },
 
         watch: {
             dataLoaded: function (val, oldVal) {
-                if (this.showEwayBill && this.billInputData.ewayBillNo != "") {
-                    this.saveInvoice()
-                }
+                //setTimeout(function() { this.print() }, 600);
             }
         },
     }
@@ -895,10 +817,6 @@
 
     .bill-hulu5 {
         width: 20%;
-    }
-
-    .bill-hulu6 {
-        width: 33%;
     }
 
     .bill-table {

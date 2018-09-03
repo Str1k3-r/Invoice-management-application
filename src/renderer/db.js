@@ -263,9 +263,6 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
         orderPlacedDate: orderPlacedDate,
         orderCompletedDate: orderCompletedDate,
         orderStatus: orderStatus,
-        savedInvoices: null,
-        savedPaymentSlips: null,
-        savedTransportSlips: null
     })
 
 
@@ -291,7 +288,6 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
             totalAmount: orderItems1[i].totalAmount,
             fulfilledDate: orderItems1[i].fulfilledDate,
             order: order._id,
-            invoice: null
         })
 
         promises.push(oI.save())
@@ -332,7 +328,6 @@ function addOrder(orderNumber, client, orderPlacedBy, orderPlacedDate, orderComp
                     mobileNo: client.mobileNo,
                     gstUIN: client.gstUIN,
                     orders: [order._id],
-                    invoices: null
                 })
 
                 c.save().then(() => {
@@ -389,26 +384,32 @@ function deleteOrderItemById(id, callback) {
 }
 
 
-function updateOrderItem(id, callback) {
-    orderItems.updateOne({_id: id}, {
-        productDescription: productDescription,
-        itemStatus: itemStatus,
-        hsnCode: hsnCode,
-        size: size,
-        discount: discount,
-        quantity: quantity,
-        amount: amount,
-        taxableAmount: taxableAmount,
-        cgstRate: cgstRate,
-        cgstAmount: cgstAmount,
-        sgstRate: sgstRate,
-        sgstAmount: sgstAmount,
-        igstRate: igstRate,
-        igstAmount: igstAmount,
-        totalAmount: totalAmount,
-        fulfilledDate: fulfilledDate,
-    }).then(() => {
-        callback()
+function updateOrderItem(oI) {
+    orderItems.updateOne({_id: oI.id}, {
+        productDescription: oI.productDescription,
+        itemStatus: oI.itemStatus,
+        hsnCode: oI.hsnCode,
+        size: oI.size,
+        discount: oI.discount,
+        quantity: oI.quantity,
+        amount: oI.amount,
+        taxableAmount: oI.taxableAmount,
+        cgstRate: oI.cgstRate,
+        cgstAmount: oI.cgstAmount,
+        sgstRate: oI.sgstRate,
+        sgstAmount: oI.sgstAmount,
+        igstRate: oI.igstRate,
+        igstAmount: oI.igstAmount,
+        totalAmount: oI.totalAmount,
+        fulfilledDate: oI.fulfilledDate,
+    }).exec()
+}
+
+
+function updateOrderStatus(id, status, date) {
+
+    orders.findOneAndUpdate({_id: id}, {orderStatus: status, orderCompletedDate: date}).then(() => {
+        return
     })
 }
 
@@ -418,6 +419,46 @@ function getAllOrders() {
     }).populate('orderItems').populate('client').populate('savedInvoices').populate('savedPaymentSlips').populate('savedTransportSlips').exec()
 }
 
+
+function addInvoice(invoice, orderID, callback) {
+    invoices.create({
+        orderNumber: invoice.orderNumber,
+        orderItems: invoice.orderItems,
+        billedTo: invoice.billedTo,
+        shippedTo: invoice.shippedTo,
+        orderPlacedBy: invoice.orderPlacedBy,
+        orderPlacedDate: invoice.orderPlacedDate,
+        reverseCharge: invoice.reverseCharge,
+        transportationMode: invoice.transportationMode,
+        dateOfSupply: invoice.dateOfSupply,
+        placeOfSupply: invoice.placeOfSupply,
+        state: invoice.state,
+        stateCode: invoice.stateCode,
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceDate: invoice.invoiceDate,
+        transportationAgency: invoice.transportationAgency,
+        numberOfPacking: invoice.numberOfPacking,
+        privateMarka: invoice.privateMarka,
+        ewayBillNo: invoice.ewayBillNo,
+    }, (err, iv) => {
+        if (err) {
+            console.log(err)
+            callback("Not Added")
+        }
+
+        orders.findOneAndUpdate({_id: orderID}, {$push: {savedInvoices: iv._id}}).then(() => {
+            callback("Invoice has been added")
+        })
+    })
+
+}
+
+
+function getInvoiceById(id) {
+    return invoices.find({_id: id}, (err) => {
+        if (err) throw err
+    }).populate('orderItems').populate('billedTo').exec()
+}
 
 var dbUtils = {
     addProductSpecification,
@@ -442,7 +483,11 @@ var dbUtils = {
     getAllOrders,
     getOrderById,
     deleteOrderById,
-    addOrder
+    addOrder,
+    updateOrderItem,
+    updateOrderStatus,
+    addInvoice,
+    getInvoiceById
 }
 
 export default dbUtils

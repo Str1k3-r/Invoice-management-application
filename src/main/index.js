@@ -47,6 +47,13 @@ function createWindow() {
         });
 
     })
+
+    ipc.on('print-bill', function (event, args) {
+        mainWindow.webContents.print({pageSize: 'A5'}, (success) => {
+            event.sender.send("bill-printed", true);
+        });
+
+    })
 }
 
 app.on('ready', createWindow)

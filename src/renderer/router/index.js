@@ -74,6 +74,12 @@ export default new Router({
           name: 'bill',
           component: require('@/components/Print/Bill').default
       },
+
+      {
+          path: '/vbill/:id',
+          name: 'vbill',
+          component: require('@/components/Print/ViewBill').default
+      },
     {
       path: '*',
       redirect: '/'
